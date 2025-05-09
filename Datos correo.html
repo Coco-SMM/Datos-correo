@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Formulario de Contacto</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      padding: 2rem;
+    }
+    .form-container {
+      background: white;
+      padding: 2rem;
+      max-width: 500px;
+      margin: auto;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    input, textarea {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #28a745;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <script>
+    (function(){
+      emailjs.init("TU_USER_ID"); // Reemplaza con tu User ID de EmailJS
+    })();
+  </script>
+</head>
+<body>
+  <div class="form-container">
+    <h2>Formulario de Contacto</h2>
+    <form id="contactForm">
+      <label for="name">Nombre:</label>
+      <input type="text" id="name" name="name" required>
+
+      <label for="email">Correo Electrónico:</label>
+      <input type="email" id="email" name="email" required>
+
+      <label for="message">Mensaje:</label>
+      <textarea id="message" name="message" rows="5" required></textarea>
+
+      <button type="submit">Enviar</button>
+    </form>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD3bclXHlP6zhKLGwdfn-M1E26ssRXozf4",
+      authDomain: "datos-de-correo.firebaseapp.com",
+      projectId: "datos-de-correo",
+      storageBucket: "datos-de-correo.firebasestorage.app",
+      messagingSenderId: "200799643196",
+      appId: "1:200799643196:web:2c67f56719359a3b5c4539"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    document.getElementById('contactForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const message = document.getElementById('message').value;
+
+      try {
+        await addDoc(collection(db, 'mensajes'), {
+          nombre: name,
+          correo: email,
+          mensaje: message,
+          fecha: new Date()
+        });
+
+        // Enviar copia del mensaje al correo del usuario con EmailJS
+        emailjs.send("TU_SERVICE_ID", "TU_TEMPLATE_ID", {
+          nombre: name,
+          correo: email,
+          mensaje: message
+        }).then(() => {
+          alert('Mensaje enviado con éxito y copia enviada al correo.');
+          document.getElementById('contactForm').reset();
+        }, (error) => {
+          alert('Mensaje guardado pero falló el envío de la copia por correo: ' + error);
+        });
+      } catch (error) {
+        alert('Error al enviar el mensaje: ' + error);
+      }
+    });
+  </script>
+</body>
+</html>
